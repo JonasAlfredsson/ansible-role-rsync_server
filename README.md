@@ -26,7 +26,7 @@ main playbook like this:
 
 ```yaml
 - hosts: all
-  name: Install rsycnc and configure it to run as a deamon
+  name: Install rsync and configure it to run as a deamon
   roles:
     - rsync_server
 ```
