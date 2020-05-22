@@ -1,0 +1,3 @@
+rsync_config_file: "/etc/rsyncd.conf"
+rsync_secrets_file: "/etc/rsyncd.secrets"
+rsync_log_directory: "/var/log/rsyncd"

@@ -1,0 +1,12 @@
+################################################################################
+#>> This file is managed by Ansible - changes made here will be overwritten. <<#
+################################################################################
+{{ rsync_log_directory }}/*.log {
+    {{ rsync_logrotate_interval | default('weekly') }}
+    missingok
+    rotate {{ rsync_logrotate_count | default('10') }}
+    notifempty
+    compress
+    delaycompress
+    nocreate
+}

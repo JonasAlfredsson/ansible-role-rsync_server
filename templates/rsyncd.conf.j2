@@ -1,0 +1,78 @@
+################################################################################
+#>> This file is managed by Ansible - changes made here will be overwritten. <<#
+################################################################################
+#
+# {{ rsync_config_file }}: config file for the rsync daemon.
+#
+
+[global]
+
+# Daemon and Logging
+pid file = {{ rsync_pid_file | default('/var/run/rsyncd.pid') }}
+lock file = {{ rsync_lock_file | default('/var/run/rsync.lock') }}
+log file = {{ rsync_log_directory }}/rsyncd.log
+log format = {{ rsync_log_format | default('%o %h [%a] %m (%u) %f %l') }}
+max verbosity = {{ rsync_max_verbosity | default('1') }}
+
+# Security and Users
+uid = {{ rsync_uid | default('nobody') }}
+gid = {{ rsync_gid | default('nogroup') }}
+use chroot = {{ rsync_use_chroot | default(true) | ternary('yes', 'no') }}
+secrets file = {{ rsync_secrets_file }}
+{% if rsync_auth_users is defined and rsync_auth_users|length > 0 %}
+auth users = , {{ rsync_auth_users | join(', ') }}
+{% endif %}
+{% if rsync_hosts_allow is defined and rsync_hosts_allow|length > 0 %}
+hosts allow = , {{ rsync_hosts_allow | join(', ') }}
+{% endif %}
+
+# Networking
+port = {{ rsync_port | default('873') }}
+max connections = {{ rsync_max_connections | default('0') }}
+timeout = {{ rsync_timeout | default('3600') }}
+
+# Shares and Files
+{% if rsync_motd_file is defined %}
+motd file = {{ rsync_motd_file }}
+{% endif %}
+list = {{ rsync_list | default(true) | ternary('yes', 'no') }}
+read only = {{ rsync_read_only | default(true) | ternary('yes', 'no') }}
+{% if rsync_exclude is defined and rsync_exclude|length > 0 %}
+exclude = {{ rsync_exclude | join(' ') }}
+{% endif %}
+{% if rsync_dont_compress is defined and rsync_dont_compress|length > 0 %}
+dont compress = {{ rsync_dont_compress | join(' ') }}
+{% endif %}
+
+
+{% if rsync_shares is defined and rsync_shares|length > 0 %}
+{% for share in rsync_shares %}
+[{{ share.name }}]
+{% if share.comment is defined %}
+    comment = {{ share.comment }}
+{% endif %}
+    path = {{ share.path }}
+{% if share.list is defined %}
+    list = {{ share.list | ternary('yes', 'no') }}
+{% endif %}
+{% if share.uid is defined %}
+    uid = {{ share.uid }}
+{% endif %}
+{% if share.gid is defined %}
+    gid = {{ share.gid }}
+{% endif %}
+{% if share.read_only is defined %}
+    read_only = {{ share.read_only | ternary('yes', 'no') }}
+{% endif %}
+{% if share.auth_users is defined and share.auth_users|length > 0 %}
+    auth users = , {{ share.auth_users | join(', ') }}
+{% endif %}
+{% if share.exclude is defined and share.exclude|length > 0 %}
+    exclude = {{ share.exclude | join(' ') }}
+{% endif %}
+{% if share.timeout is defined %}
+    timeout = {{ share.timeout }}
+{% endif %}
+
+{% endfor %}
+{% endif %}

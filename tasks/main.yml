@@ -1,0 +1,54 @@
+---
+- name: Install packages needed for the rsync server
+  become: true
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - rsync
+      - logrotate
+
+- name: Create rsync log directory
+  become: true
+  file:
+    path: "{{ rsync_log_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Push out rsync configuration file
+  become: true
+  template:
+    dest: "{{ rsync_config_file }}"
+    src: rsyncd.conf.j2
+  notify:
+    - Restart rsync service
+
+- name: Push out rsync secrets file
+  become: true
+  template:
+    dest: "{{ rsync_secrets_file }}"
+    src: rsyncd.secrets.j2
+    owner: root
+    group: root
+    mode: '0600'
+  notify:
+    - Restart rsync service
+
+- name: Push out logrotate configuration for rsync
+  become: true
+  template:
+    dest: "/etc/logrotate.d/rsyncd"
+    src: logrotate.j2
+
+- name: Enable automatic start of the rsync deamon at boot
+  become: true
+  service:
+    name: rsync
+    enabled: true
+  notify:
+    - Restart rsync service
